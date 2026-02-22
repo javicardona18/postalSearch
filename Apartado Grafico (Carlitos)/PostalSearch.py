@@ -11,7 +11,7 @@ class MainWindow(QWidget):
         super().__init__()
 
         self.setWindowTitle("PostalSearch")
-        self.background = QPixmap("fondo.png")
+        self.background = QPixmap("Apartado Grafico (Carlitos)/fondo.png")
         self.init_ui()
         self.showMaximized()
 
