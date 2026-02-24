@@ -1,65 +1,47 @@
 import sys
-from PySide6.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QLabel,
-    QPushButton, QFrame
-)
+import os
+from PySide6.QtWidgets import QApplication, QWidget, QLabel
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPalette, QBrush, QPixmap
+from PySide6.QtGui import QPalette, QBrush, QPixmap, QFontDatabase, QFont
+
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
 
+        #Ruta base del proyecto
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+
+        #Se carga la fuente
+        font_path = os.path.join(base_dir, "Resources", "Fuentes", "Banita.ttf")
+        font_id = QFontDatabase.addApplicationFont(font_path)
+        
+        #Si se encuentra la fuente, font_id es un id si no devuelve -1 y no se cumple el if.
+        if font_id != -1:
+            font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
+            self.custom_font = QFont(font_family, 40)
+        else:
+            print("Error cargando la fuente")
+            self.custom_font = QFont("Arial", 40)
+
+        #Se carga el logo.
+        logo_path = os.path.join(base_dir, "Resources", "imagenes", "logo.png")
+    
+        self.original_logo = QPixmap(logo_path)
+        self.logo_label = QLabel(self)
+        self.logo_label.setPixmap(self.original_logo)
+        self.logo_label.setFixedSize(750, 120)
+
+        #Se carga el fondo.
+        background_path = os.path.join(base_dir, "Resources", "imagenes", "fondo.png")
+        self.background = QPixmap(background_path)
+        
+        #Detalles de la ventana.
         self.setWindowTitle("PostalSearch")
-        self.background = QPixmap("Apartado Grafico (Carlitos)/fondo.png")
-        self.init_ui()
-        self.showMaximized()
-
-    def init_ui(self):
-        main_layout = QVBoxLayout()
-        main_layout.setAlignment(Qt.AlignCenter)
-
-        panel = QFrame()
-        panel.setFixedWidth(400)
-        panel.setObjectName("mainPanel")
-        panel.setStyleSheet("""
-            #mainPanel {
-                background-color: rgba(255, 255, 255, 230);
-                border-radius: 15px;
-                border: 2px solid black;
-            }
-        """)
-
-        panel_layout = QVBoxLayout()
-        panel_layout.setSpacing(25)
-        panel_layout.setContentsMargins(40, 60, 40, 60)
-
-        logo = QLabel("PostalSearch")
-        logo.setAlignment(Qt.AlignCenter)
-        logo.setStyleSheet("""
-            font-size: 40px;
-            font-weight: bold;
-            color: #2c3e50;
-        """)
-
-        btn_busqueda = QPushButton("Búsqueda")
-        btn_busqueda.setFixedHeight(50)
-
-        btn_salir = QPushButton("Salir")
-        btn_salir.setFixedHeight(50)
-        btn_salir.clicked.connect(QApplication.quit)
-
-        panel_layout.addWidget(logo)
-        panel_layout.addSpacing(20)
-        panel_layout.addWidget(btn_busqueda)
-        panel_layout.addWidget(btn_salir)
-
-        panel.setLayout(panel_layout)
-
-        main_layout.addWidget(panel)
-        self.setLayout(main_layout)
+        self.showMaximized()    
 
     def resizeEvent(self, event):
+        #Escalando el fondo al tamaño de la ventana.
         scaled = self.background.scaled(
             self.size(),
             Qt.IgnoreAspectRatio,
@@ -68,6 +50,13 @@ class MainWindow(QWidget):
         palette = QPalette()
         palette.setBrush(QPalette.Window, QBrush(scaled))
         self.setPalette(palette)
+        
+        #Escalando el logo al tamaño de la ventana.
+        nueva_escala = int(self.width() * 0.45)  # 10% del ancho ventana
+        logo_escalado = self.original_logo.scaled(nueva_escala,nueva_escala,Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.logo_label.setPixmap(logo_escalado)
+        
+        super().resizeEvent(event)
 
 
 def main():
