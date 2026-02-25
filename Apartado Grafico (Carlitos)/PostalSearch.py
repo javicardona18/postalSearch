@@ -30,7 +30,7 @@ class MainWindow(QWidget):
         self.original_logo = QPixmap(logo_path)
         self.logo_label = QLabel(self)
         self.logo_label.setPixmap(self.original_logo)
-        self.logo_label.setFixedSize(750, 120)
+        self.logo_label.setFixedSize(750, 160)
 
         #Se carga el fondo.
         background_path = os.path.join(base_dir, "Resources", "imagenes", "fondo.png")
@@ -52,7 +52,7 @@ class MainWindow(QWidget):
         self.setPalette(palette)
         
         #Escalando el logo al tamaño de la ventana.
-        nueva_escala = int(self.width() * 0.45)  # 10% del ancho ventana
+        nueva_escala = int(self.width() * 0.4)  # 10% del ancho ventana
         logo_escalado = self.original_logo.scaled(nueva_escala,nueva_escala,Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.logo_label.setPixmap(logo_escalado)
         
