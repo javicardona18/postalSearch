@@ -1,15 +1,7 @@
 import os
-from PySide6.QtWidgets import (
-    QWidget,
-    QLabel,
-    QStackedWidget,
-    QPushButton,
-    QVBoxLayout,
-    QSizePolicy,
-)
+from PySide6.QtWidgets import (QWidget,QLabel,QStackedWidget,QPushButton,QVBoxLayout,QSizePolicy,QFrame,QApplication)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPalette, QBrush, QPixmap, QFontDatabase, QFont
-
 
 # -----------------------------
 # Widget personalizado del Logo
@@ -19,14 +11,11 @@ class LogoWidget(QLabel):
         super().__init__()
         self.original_pixmap = pixmap
         self.setAlignment(Qt.AlignCenter)
-        self.setSizePolicy(
-            QSizePolicy.Expanding,
-            QSizePolicy.Expanding
-        )
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     def resizeEvent(self, event):
         if not self.original_pixmap.isNull():
-            max_width = int(self.width() * 0.8)
+            max_width = int(self.width() * 0.6)
 
             scaled = self.original_pixmap.scaled(
                 max_width,
@@ -39,6 +28,21 @@ class LogoWidget(QLabel):
 
         super().resizeEvent(event)
 
+# -----------------------------
+# Paneles
+# -----------------------------
+class Panel(QFrame):
+    def __init__(self, widget_inside):
+        super().__init__()
+
+        self.setObjectName("panel")
+
+        # Tamaño fijo uniforme
+        self.setFixedSize(180, 80)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(widget_inside, alignment=Qt.AlignCenter)
 
 # -----------------------------
 # Pantalla Menú
@@ -47,32 +51,37 @@ class Menu(QWidget):
     def __init__(self):
         super().__init__()
 
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        logo_path = os.path.join(base_dir, "recursos", "imagenes", "logo.png")
+        ruta_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        logo_path = os.path.join(ruta_dir, "recursos", "imagenes", "logo.png")
         original_logo = QPixmap(logo_path)
 
         self.logo = LogoWidget(original_logo)
 
         self.btnbusqueda = QPushButton("Ir a Búsqueda")
-        self.btnsalir = QPushButton("Salir")
+        self.btnsalir = QPushButton("Abandonar")
+        
+        # Se meten los botones en paneles
+        panel_busqueda = Panel(self.btnbusqueda)
+        panel_salir = Panel(self.btnsalir)
 
         # Opcional: botones más elegantes
         self.btnbusqueda.setMaximumWidth(300)
         self.btnsalir.setMaximumWidth(300)
 
         # Layout principal
-        main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(40, 40, 40, 40)
-        main_layout.setSpacing(20)
+        layout_principal = QVBoxLayout()
+        layout_principal.setContentsMargins(40, 40, 40, 40)
+        layout_principal.setSpacing(30)
+        layout_principal.addStretch()
+        
+        layout_principal.addWidget(self.logo)
+        layout_principal.addStretch()
 
-        main_layout.addStretch()
-        main_layout.addWidget(self.logo)
-        main_layout.addStretch()
-        main_layout.addWidget(self.btnbusqueda, alignment=Qt.AlignCenter)
-        main_layout.addWidget(self.btnsalir, alignment=Qt.AlignCenter)
-        main_layout.addStretch()
+        layout_principal.addWidget(panel_busqueda, alignment=Qt.AlignCenter)
+        layout_principal.addWidget(panel_salir, alignment=Qt.AlignCenter)
+        layout_principal.addStretch()
 
-        self.setLayout(main_layout)
+        self.setLayout(layout_principal)
 
 
 # -----------------------------
@@ -85,14 +94,14 @@ class Busqueda(QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(40, 40, 40, 40)
 
-        title = QLabel("Pantalla de Búsqueda")
-        title.setAlignment(Qt.AlignCenter)
+        titulo = QLabel("Pantalla de Búsqueda")
+        titulo.setAlignment(Qt.AlignCenter)
 
         self.btn_back = QPushButton("Volver al menú")
         self.btn_back.setMaximumWidth(300)
 
         layout.addStretch()
-        layout.addWidget(title)
+        layout.addWidget(titulo)
         layout.addWidget(self.btn_back, alignment=Qt.AlignCenter)
         layout.addStretch()
 
@@ -107,6 +116,44 @@ class MainWindow(QWidget):
         super().__init__()
 
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        
+        
+        # --- Fuente personalizada ---
+        font_path = os.path.join(base_dir, "recursos", "fuentes", "Banita.ttf")
+        font_id = QFontDatabase.addApplicationFont(font_path)
+
+        if font_id != -1:
+            font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
+            self.custom_font = QFont(font_family, 40)
+        else:
+            print("Error cargando la fuente")
+            self.custom_font = QFont("Arial", 40)
+        
+        QApplication.instance().setFont(self.custom_font)
+        
+        self.setStyleSheet("""
+        QFrame#panel {
+            background-color: #0A4D8C;
+            border-radius: 15px;
+        }
+
+        QPushButton {
+            background-color: #0A4D8C;
+            color: white;
+            border: black;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 23px;
+        }
+
+        QPushButton:hover {
+            background-color: #1366B3;
+        }
+
+        QPushButton:pressed {
+            background-color: #083A66;
+        }
+        """)
 
         # --- Stack de pantallas ---
         self.stack = QStackedWidget()
@@ -126,17 +173,6 @@ class MainWindow(QWidget):
         self.pantalla_menu.btnbusqueda.clicked.connect(self.ir_a_busqueda)
         self.pantalla_menu.btnsalir.clicked.connect(self.close)
         self.pantalla_busqueda.btn_back.clicked.connect(self.ir_a_menu)
-
-        # --- Fuente personalizada ---
-        font_path = os.path.join(base_dir, "recursos", "fuentes", "Banita.ttf")
-        font_id = QFontDatabase.addApplicationFont(font_path)
-
-        if font_id != -1:
-            font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
-            self.custom_font = QFont(font_family, 40)
-        else:
-            print("Error cargando la fuente")
-            self.custom_font = QFont("Arial", 40)
 
         # --- Fondo ---
         background_path = os.path.join(base_dir, "recursos", "imagenes", "fondo.png")
