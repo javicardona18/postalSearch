@@ -200,8 +200,8 @@ class Busqueda(QWidget):
         table_layout.setContentsMargins(20, 20, 20, 20)
 
         table = QTableWidget()
-        table.setColumnCount(4)
-        table.setHorizontalHeaderLabels(["ID", "Nombre", "Apellido", "CI"])
+        table.setColumnCount(5)  # Ahora sí tenemos 5 columnas
+        table.setHorizontalHeaderLabels(["Nombre", "Apellido", "CI", "Correo Electrónico","Teléfono"])
         table.setRowCount(6)
         table.horizontalHeader().setStretchLastSection(True)
         table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -228,19 +228,22 @@ class Busqueda(QWidget):
         table.verticalHeader().setVisible(False)
         table.setSelectionMode(QTableWidget.NoSelection)
 
+        # Datos de ejemplo, ahora con 5 campos y teléfono
         datos = [
-            (1, "Juan", "Pérez", "12345678"),
-            (2, "María", "Gómez", "87654321"),
-            (3, "Carlos", "Rodríguez", "45678912"),
-            (4, "Ana", "Martínez", "74125896"),
-            (5, "Luis", "Fernández", "85236974"),
-            (6, "Sofía", "López", "96385274"),
+            ("Juan", "Pérez", "12345678", "juan.perez@email.com", "555-1234"),
+            ("María", "Gómez", "87654321", "maria.gomez@email.com", "555-5678"),
+            ("Carlos", "Rodríguez", "45678912", "carlos.rodriguez@email.com", "555-9012"),
+            ("Ana", "Martínez", "74125896", "ana.martinez@email.com", "555-3456"),
+            ("Luis", "Fernández", "85236974", "luis.fernandez@email.com", "555-7890"),
+            ("Sofía", "López", "96385274", "sofia.lopez@email.com", "555-2345"),
         ]
 
+        # Insertar datos centrados en la tabla
         for row, data in enumerate(datos):
             for col, value in enumerate(data):
                 item = QTableWidgetItem(str(value))
                 item.setFlags(Qt.ItemIsEnabled)
+                item.setTextAlignment(Qt.AlignCenter)  # <-- Centramos el texto
                 table.setItem(row, col, item)
 
         table_layout.addWidget(table)
