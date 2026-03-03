@@ -1,203 +1,204 @@
-import os
-from PySide6.QtWidgets import (QWidget,QLabel,QStackedWidget,QPushButton,QVBoxLayout,QSizePolicy,QFrame,QApplication)
+import sys
+from PySide6.QtWidgets import (
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+    QPushButton, QLabel, QLineEdit, QTableWidget, QTableWidgetItem,
+    QFrame, QSizePolicy
+)
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPalette, QBrush, QPixmap, QFontDatabase, QFont
+from PySide6.QtGui import QFont
 
-# -----------------------------
-# Widget personalizado del Logo
-# -----------------------------
-class LogoWidget(QLabel):
-    def __init__(self, pixmap):
-        super().__init__()
-        self.original_pixmap = pixmap
-        self.setAlignment(Qt.AlignCenter)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-    def resizeEvent(self, event):
-        if not self.original_pixmap.isNull():
-            max_width = int(self.width() * 0.6)
-
-            scaled = self.original_pixmap.scaled(
-                max_width,
-                max_width,
-                Qt.KeepAspectRatio,
-                Qt.SmoothTransformation
-            )
-
-            self.setPixmap(scaled)
-
-        super().resizeEvent(event)
-
-# -----------------------------
-# Paneles
-# -----------------------------
-class Panel(QFrame):
-    def __init__(self, widget_inside):
-        super().__init__()
-
-        self.setObjectName("panel")
-
-        # Tamaño fijo uniforme
-        self.setFixedSize(180, 80)
-
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(widget_inside, alignment=Qt.AlignCenter)
-
-# -----------------------------
-# Pantalla Menú
-# -----------------------------
-class Menu(QWidget):
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("PostalSearch")
+        self.resize(1200, 700)
 
-        ruta_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        logo_path = os.path.join(ruta_dir, "recursos", "imagenes", "logo.png")
-        original_logo = QPixmap(logo_path)
+        # Widget principal
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
 
-        self.logo = LogoWidget(original_logo)
+        main_layout = QHBoxLayout()
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+        central_widget.setLayout(main_layout)
 
-        self.btnbusqueda = QPushButton("Ir a Búsqueda")
-        self.btnsalir = QPushButton("Abandonar")
-        
-        # Se meten los botones en paneles
-        panel_busqueda = Panel(self.btnbusqueda)
-        panel_salir = Panel(self.btnsalir)
-
-        # Opcional: botones más elegantes
-        self.btnbusqueda.setMaximumWidth(300)
-        self.btnsalir.setMaximumWidth(300)
-
-        # Layout principal
-        layout_principal = QVBoxLayout()
-        layout_principal.setContentsMargins(40, 40, 40, 40)
-        layout_principal.setSpacing(30)
-        layout_principal.addStretch()
-        
-        layout_principal.addWidget(self.logo)
-        layout_principal.addStretch()
-
-        layout_principal.addWidget(panel_busqueda, alignment=Qt.AlignCenter)
-        layout_principal.addWidget(panel_salir, alignment=Qt.AlignCenter)
-        layout_principal.addStretch()
-
-        self.setLayout(layout_principal)
-
-
-# -----------------------------
-# Pantalla Búsqueda
-# -----------------------------
-class Busqueda(QWidget):
-    def __init__(self):
-        super().__init__()
-
-        layout = QVBoxLayout()
-        layout.setContentsMargins(40, 40, 40, 40)
-
-        titulo = QLabel("Pantalla de Búsqueda")
-        titulo.setAlignment(Qt.AlignCenter)
-
-        self.btn_back = QPushButton("Volver al menú")
-        self.btn_back.setMaximumWidth(300)
-
-        layout.addStretch()
-        layout.addWidget(titulo)
-        layout.addWidget(self.btn_back, alignment=Qt.AlignCenter)
-        layout.addStretch()
-
-        self.setLayout(layout)
-
-
-# -----------------------------
-# Ventana Principal
-# -----------------------------
-class MainWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        
-        
-        # --- Fuente personalizada ---
-        font_path = os.path.join(base_dir, "recursos", "fuentes", "Banita.ttf")
-        font_id = QFontDatabase.addApplicationFont(font_path)
-
-        if font_id != -1:
-            font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
-            self.custom_font = QFont(font_family, 40)
-        else:
-            print("Error cargando la fuente")
-            self.custom_font = QFont("Arial", 40)
-        
-        QApplication.instance().setFont(self.custom_font)
-        
-        self.setStyleSheet("""
-        QFrame#panel {
-            background-color: #0A4D8C;
-            border-radius: 15px;
-        }
-
-        QPushButton {
-            background-color: #0A4D8C;
-            color: white;
-            border: black;
-            border-radius: 15px;
-            padding: 20px;
-            font-size: 23px;
-        }
-
-        QPushButton:hover {
-            background-color: #1366B3;
-        }
-
-        QPushButton:pressed {
-            background-color: #083A66;
-        }
+        # =======================
+        # SIDEBAR
+        # =======================
+        sidebar = QFrame()
+        sidebar.setFixedWidth(220)
+        sidebar.setStyleSheet("""
+            QFrame {
+                background-color: #42A5F5;
+            }
+            QPushButton {
+                color: white;
+                background-color: transparent;
+                border: none;
+                padding: 15px;
+                text-align: left;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #BBDEFB;
+                color: #1E3A5F;
+            }
         """)
 
-        # --- Stack de pantallas ---
-        self.stack = QStackedWidget()
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.stack)
+        sidebar_layout = QVBoxLayout()
+        sidebar_layout.setContentsMargins(0, 20, 0, 0)
+        sidebar_layout.setSpacing(10)
 
-        # Crear pantallas
-        self.pantalla_menu = Menu()
-        self.pantalla_busqueda = Busqueda()
+        botones = ["Dashboard", "Clientes", "Reportes", "Configuración"]
+        for texto in botones:
+            btn = QPushButton(texto)
+            sidebar_layout.addWidget(btn)
 
-        # Añadir al stack
-        self.stack.addWidget(self.pantalla_menu)
-        self.stack.addWidget(self.pantalla_busqueda)
-        self.stack.setCurrentWidget(self.pantalla_menu)
+        sidebar_layout.addStretch()
+        sidebar.setLayout(sidebar_layout)
 
-        # Conectar botones
-        self.pantalla_menu.btnbusqueda.clicked.connect(self.ir_a_busqueda)
-        self.pantalla_menu.btnsalir.clicked.connect(self.close)
-        self.pantalla_busqueda.btn_back.clicked.connect(self.ir_a_menu)
+        # =======================
+        # ÁREA PRINCIPAL
+        # =======================
+        content = QFrame()
+        content.setStyleSheet("background-color: #E3F2FD;")
+        content_layout = QVBoxLayout()
+        content_layout.setContentsMargins(20, 20, 20, 20)
+        content_layout.setSpacing(15)
+        content.setLayout(content_layout)
 
-        # --- Fondo ---
-        background_path = os.path.join(base_dir, "recursos", "imagenes", "fondo.png")
-        self.background = QPixmap(background_path)
+        # =======================
+        # HEADER
+        # =======================
+        header = QFrame()
+        header.setStyleSheet("background-color: white; border-radius: 8px;")
+        header_layout = QHBoxLayout()
+        header_layout.setContentsMargins(15, 10, 15, 10)
 
-        self.setWindowTitle("PostalSearch")
-        self.showMaximized()
+        search_bar = QLineEdit()
+        search_bar.setPlaceholderText("Buscar...")
+        search_bar.setFixedHeight(35)
+        search_bar.setStyleSheet("""
+            QLineEdit {
+                border: 2px solid #90CAF9;
+                border-radius: 6px;
+                padding-left: 10px;
+                background-color: #F5F5F5;
+            }
+        """)
 
-    def ir_a_busqueda(self):
-        self.stack.setCurrentWidget(self.pantalla_busqueda)
+        user_label = QLabel("Usuario")
+        user_label.setFont(QFont("Arial", 12))
+        user_label.setStyleSheet("color: #424242;")
 
-    def ir_a_menu(self):
-        self.stack.setCurrentWidget(self.pantalla_menu)
+        header_layout.addWidget(search_bar)
+        header_layout.addStretch()
+        header_layout.addWidget(user_label)
 
-    def resizeEvent(self, event):
-        if not self.background.isNull():
-            scaled_bg = self.background.scaled(
-                self.size(),
-                Qt.IgnoreAspectRatio,
-                Qt.SmoothTransformation
-            )
+        header.setLayout(header_layout)
 
-            palette = QPalette()
-            palette.setBrush(QPalette.Window, QBrush(scaled_bg))
-            self.setAutoFillBackground(True)
-            self.setPalette(palette)
+        # =======================
+        # DASHBOARD
+        # =======================
+        dashboard = QFrame()
+        dashboard.setStyleSheet("background-color: white; border-radius: 8px;")
+        dashboard_layout = QVBoxLayout()
+        dashboard_layout.setContentsMargins(20, 20, 20, 20)
+        dashboard_layout.setSpacing(15)
+        dashboard.setLayout(dashboard_layout)
 
-        super().resizeEvent(event)
+        # Tabla
+        table = QTableWidget()
+        table.setColumnCount(4)
+        table.setHorizontalHeaderLabels(["ID", "Nombre", "Apellido", "CI"])
+        table.setRowCount(6)
+
+        # Estilo tabla (solo líneas horizontales)
+        table.setStyleSheet("""
+            QTableWidget {
+                border: none;
+                background-color: white;
+                gridline-color: #E0E0E0;
+            }
+            QHeaderView::section {
+                background-color: #64B5F6;
+                color: white;
+                padding: 8px;
+                border: none;
+            }
+        """)
+
+        table.setShowGrid(True)
+        table.setGridStyle(Qt.SolidLine)
+        table.verticalHeader().setVisible(False)
+        table.setSelectionMode(QTableWidget.NoSelection)
+
+        # Datos ejemplo
+        datos = [
+            (1, "Juan", "Pérez", "12345678"),
+            (2, "María", "Gómez", "87654321"),
+            (3, "Carlos", "Rodríguez", "45678912"),
+            (4, "Ana", "Martínez", "74125896"),
+            (5, "Luis", "Fernández", "85236974"),
+            (6, "Sofía", "López", "96385274"),
+        ]
+
+        for row, data in enumerate(datos):
+            for col, value in enumerate(data):
+                item = QTableWidgetItem(str(value))
+                item.setFlags(Qt.ItemIsEnabled)
+                table.setItem(row, col, item)
+
+        # Destacar primera fila con cuarto color (#BBDEFB)
+        for col in range(4):
+            table.item(0, col).setBackground(Qt.GlobalColor.transparent)
+            table.item(0, col).setBackground(Qt.GlobalColor.white)
+            table.item(0, col).setBackground(Qt.GlobalColor.transparent)
+            table.item(0, col).setBackground(Qt.GlobalColor.white)
+
+        table.setRowHeight(0, 35)
+        table.setStyleSheet(table.styleSheet() + """
+            QTableWidget::item:first {
+                background-color: #BBDEFB;
+            }
+        """)
+
+        dashboard_layout.addWidget(table)
+
+        # Botón generar reporte
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+
+        btn_reporte = QPushButton("Generar Reporte")
+        btn_reporte.setFixedSize(180, 40)
+        btn_reporte.setStyleSheet("""
+            QPushButton {
+                background-color: #42A5F5;
+                color: white;
+                border-radius: 6px;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #1E88E5;
+            }
+        """)
+
+        btn_layout.addWidget(btn_reporte)
+        dashboard_layout.addLayout(btn_layout)
+
+        # =======================
+        # AGREGAR COMPONENTES
+        # =======================
+        content_layout.addWidget(header)
+        content_layout.addWidget(dashboard)
+
+        main_layout.addWidget(sidebar)
+        main_layout.addWidget(content)
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
