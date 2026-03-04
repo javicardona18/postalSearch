@@ -1,7 +1,7 @@
 import os
-from PySide6.QtWidgets import (QWidget,QLabel,QStackedWidget,QPushButton,QVBoxLayout,QSizePolicy,QFrame,QApplication)
+from PySide6.QtWidgets import (QWidget,QLabel,QStackedWidget,QPushButton,QVBoxLayout,QSizePolicy,QFrame,QApplication,QHBoxLayout,QLineEdit,QTableWidget, QTableWidgetItem, QHeaderView)
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPalette, QBrush, QPixmap, QFontDatabase, QFont
+from PySide6.QtGui import QPalette, QBrush, QPixmap, QFontDatabase, QFont, QColor
 
 # -----------------------------
 # Widget personalizado del Logo
@@ -50,10 +50,13 @@ class Panel(QFrame):
 class Menu(QWidget):
     def __init__(self):
         super().__init__()
-
+        
         ruta_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        
         logo_path = os.path.join(ruta_dir, "recursos", "imagenes", "logo.png")
         original_logo = QPixmap(logo_path)
+        
+        self.background = QPixmap(logo_path.replace("logo.png", "fondo.png"))
 
         self.logo = LogoWidget(original_logo)
 
@@ -82,6 +85,21 @@ class Menu(QWidget):
         layout_principal.addStretch()
 
         self.setLayout(layout_principal)
+    
+    def resizeEvent(self, event):
+     if not self.background.isNull():
+        scaled_bg = self.background.scaled(
+            self.size(),
+            Qt.IgnoreAspectRatio,
+            Qt.SmoothTransformation
+        )
+        
+        palette = QPalette()
+        palette.setBrush(QPalette.Window, QBrush(scaled_bg))
+        self.setAutoFillBackground(True)
+        self.setPalette(palette)
+        
+        super(Menu, self).resizeEvent(event)
 
 
 # -----------------------------
@@ -90,22 +108,178 @@ class Menu(QWidget):
 class Busqueda(QWidget):
     def __init__(self):
         super().__init__()
+        
+        self.setStyleSheet("background-color: #E3F2FD;")
+        self.setAutoFillBackground(True)
+        palette = self.palette()
+        palette.setColor(QPalette.Window, QColor("#084169"))
+        self.setPalette(palette)
 
-        layout = QVBoxLayout()
-        layout.setContentsMargins(40, 40, 40, 40)
+        main_layout = QHBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
 
-        titulo = QLabel("Pantalla de Búsqueda")
-        titulo.setAlignment(Qt.AlignCenter)
+        # =======================
+        # SIDEBAR
+        # =======================
+        sidebar = QFrame()
+        sidebar.setFixedWidth(220)
+        sidebar.setStyleSheet("""
+            QFrame {
+                background-color: #42A5F5;
+            }
+            QPushButton {
+                color: white;
+                background-color: transparent;
+                border: none;
+                padding: 15px;
+                text-align: left;
+                font-size: 16px;
+            }
+            QPushButton:hover {
+                background-color: #BBDEFB;
+                color: #1E3A5F;
+            }
+        """)
 
+        sidebar_layout = QVBoxLayout(sidebar)
+        sidebar_layout.setContentsMargins(0, 20, 0, 0)
+        sidebar_layout.setSpacing(10)
+
+        botones = ["Dashboard", "Clientes", "Reportes", "Configuración"]
+        for texto in botones:
+            btn = QPushButton(texto)
+            sidebar_layout.addWidget(btn)
+
+        sidebar_layout.addStretch()
+
+        # =======================
+        # CONTENIDO PRINCIPAL
+        # =======================
+        content = QFrame()
+        content_layout = QVBoxLayout(content)
+        content_layout.setContentsMargins(20, 20, 20, 20)
+        content_layout.setSpacing(15)
+
+        # =======================
+        # HEADER
+        # =======================
+        header = QFrame()
+        header.setStyleSheet("background-color: white; border-radius: 8px;")
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(15, 10, 15, 10)  
+
+        search_bar = QLineEdit()
+        search_bar.setPlaceholderText("Buscar pasajero...")
+        search_bar.setFixedHeight(35)
+        search_bar.setFont(QFont(self.font().family(), 14))
+        search_bar.setStyleSheet("""
+            QLineEdit {
+                border: 2px solid #90CAF9;
+                border-radius: 6px;
+                padding-left: 10px;
+                background-color: #F5F5F5;
+            }
+        """)
+
+        user_label = QLabel("Usuario")
+        user_label.setStyleSheet("color: #424242;")
+        user_label.setFont(QFont(self.font().family(), 14))
+
+        header_layout.addWidget(search_bar)
+        header_layout.addStretch()
+        header_layout.addWidget(user_label)
+        
+
+        # =======================
+        # TABLA
+        # =======================
+        table_container = QFrame()
+        table_container.setStyleSheet("background-color: white; border-radius: 8px;")
+        table_layout = QVBoxLayout(table_container)
+        table_layout.setContentsMargins(20, 20, 20, 20)
+
+        table = QTableWidget()
+        table.setColumnCount(5)  # Ahora sí tenemos 5 columnas
+        table.setHorizontalHeaderLabels(["Nombre", "Apellido", "CI", "Correo Electrónico","Teléfono"])
+        table.setRowCount(6)
+        table.horizontalHeader().setStretchLastSection(True)
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        table.setAlternatingRowColors(True)
+        table.setShowGrid(False)
+        table.setMinimumHeight(400)
+        table.setFont(QFont(self.font().family(), 14))
+        table.horizontalHeader().setFont(QFont(self.font().family(), 15))
+
+        table.setStyleSheet("""
+            QTableWidget {
+                border: none;
+                background-color: white;
+                gridline-color: #E0E0E0;
+            }
+            QHeaderView::section {
+                background-color: #64B5F6;
+                color: white;
+                padding: 8px;
+                border: none;
+            }
+        """)
+
+        table.verticalHeader().setVisible(False)
+        table.setSelectionMode(QTableWidget.NoSelection)
+
+        # Datos de ejemplo, ahora con 5 campos y teléfono
+        datos = [
+            ("Juan", "Pérez", "12345678", "juan.perez@email.com", "555-1234"),
+            ("María", "Gómez", "87654321", "maria.gomez@email.com", "555-5678"),
+            ("Carlos", "Rodríguez", "45678912", "carlos.rodriguez@email.com", "555-9012"),
+            ("Ana", "Martínez", "74125896", "ana.martinez@email.com", "555-3456"),
+            ("Luis", "Fernández", "85236974", "luis.fernandez@email.com", "555-7890"),
+            ("Sofía", "López", "96385274", "sofia.lopez@email.com", "555-2345"),
+        ]
+
+        # Insertar datos centrados en la tabla
+        for row, data in enumerate(datos):
+            for col, value in enumerate(data):
+                item = QTableWidgetItem(str(value))
+                item.setFlags(Qt.ItemIsEnabled)
+                item.setTextAlignment(Qt.AlignCenter)  # <-- Centramos el texto
+                table.setItem(row, col, item)
+
+        table_layout.addWidget(table)
+
+        # =======================
+        # BOTÓN VOLVER
+        # =======================
         self.btn_back = QPushButton("Volver al menú")
-        self.btn_back.setMaximumWidth(300)
+        self.btn_back.setFixedHeight(45)
+        self.btn_back.setStyleSheet("""
+            QPushButton {
+                background-color: #42A5F5;
+                color: white;
+                border-radius: 8px;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            QPushButton:hover {
+                background-color: #1E88E5;
+            }
+        """)
 
-        layout.addStretch()
-        layout.addWidget(titulo)
-        layout.addWidget(self.btn_back, alignment=Qt.AlignCenter)
-        layout.addStretch()
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        btn_layout.addWidget(self.btn_back)
+        btn_layout.addStretch()
 
-        self.setLayout(layout)
+        # =======================
+        # ENSAMBLADO FINAL
+        # =======================
+        content_layout.addWidget(header)
+        content_layout.addWidget(table_container, 1)
+        content_layout.addLayout(btn_layout)
+
+        main_layout.addWidget(sidebar)
+        main_layout.addWidget(content)
 
 
 # -----------------------------
@@ -114,12 +288,18 @@ class Busqueda(QWidget):
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
+        
+        # COLOR DE FONDO PRINCIPAL
+        self.setAutoFillBackground(True)
+        palette = self.palette()
+        palette.setColor(QPalette.Window, QColor("#054A81"))
+        self.setPalette(palette)
 
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        ruta_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         
         
         # --- Fuente personalizada ---
-        font_path = os.path.join(base_dir, "recursos", "fuentes", "Banita.ttf")
+        font_path = os.path.join(ruta_dir, "recursos", "fuentes", "Banita.ttf")
         font_id = QFontDatabase.addApplicationFont(font_path)
 
         if font_id != -1:
@@ -157,8 +337,10 @@ class MainWindow(QWidget):
         
         background_path = os.path.join(ruta_dir, "recursos", "imagenes", "fondo.png")
 
-        btn_layout.addWidget(btn_reporte)
-        dashboard_layout.addLayout(btn_layout)
+        # --- Stack de pantallas ---
+        self.stack = QStackedWidget()
+        layout = QVBoxLayout(self)
+        layout.addWidget(self.stack)
 
         # Crear pantallas
         self.pantalla_menu = Menu()
@@ -174,10 +356,6 @@ class MainWindow(QWidget):
         self.pantalla_menu.btnsalir.clicked.connect(self.close)
         self.pantalla_busqueda.btn_back.clicked.connect(self.ir_a_menu)
 
-        # --- Fondo ---
-        background_path = os.path.join(base_dir, "recursos", "imagenes", "fondo.png")
-        self.background = QPixmap(background_path)
-
         self.setWindowTitle("PostalSearch")
         self.showMaximized()
 
@@ -186,18 +364,3 @@ class MainWindow(QWidget):
 
     def ir_a_menu(self):
         self.stack.setCurrentWidget(self.pantalla_menu)
-
-    def resizeEvent(self, event):
-        if not self.background.isNull():
-            scaled_bg = self.background.scaled(
-                self.size(),
-                Qt.IgnoreAspectRatio,
-                Qt.SmoothTransformation
-            )
-
-            palette = QPalette()
-            palette.setBrush(QPalette.Window, QBrush(scaled_bg))
-            self.setAutoFillBackground(True)
-            self.setPalette(palette)
-
-        super().resizeEvent(event)
