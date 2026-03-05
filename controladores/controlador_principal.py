@@ -1,12 +1,13 @@
 import os
 from PySide6.QtWidgets import QWidget, QStackedWidget, QVBoxLayout, QApplication
 from PySide6.QtGui import QPalette, QColor, QFontDatabase, QFont
-
 from vistas.vista_menu import VistaMenu
 from vistas.vista_busqueda import VistaBusqueda
 from modelos.modelo_pasajero import obtener_pasajeros
 from PySide6.QtWidgets import QTableWidgetItem
 from PySide6.QtCore import Qt
+from servicios.kiu_api import obtener_pasajeros_api
+from modelos.modelo_pasajero import insertar_pasajeros_api
 
 
 class ControladorPrincipal(QWidget):
@@ -94,4 +95,11 @@ class ControladorPrincipal(QWidget):
                 item.setTextAlignment(Qt.AlignCenter)
                 tabla.setItem(row, col, item)
 
+    def actualizar_desde_api(self):
+
+        pasajeros = obtener_pasajeros_api()
+
+        insertar_pasajeros_api(pasajeros)
+
+        self.cargar_tabla()
             

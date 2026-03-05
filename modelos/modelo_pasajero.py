@@ -86,3 +86,24 @@ def insertar_datos_prueba():
         conexion.commit()
 
     conexion.close()
+
+def insertar_pasajeros_api(lista_pasajeros):
+
+    conexion = conectar()
+    cursor = conexion.cursor()
+
+    for pasajero in lista_pasajeros:
+
+        cursor.execute("""
+            INSERT INTO pasajeros (nombre, apellido, ci, correo, telefono)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            pasajero["nombre"],
+            pasajero["apellido"],
+            pasajero["ci"],
+            pasajero["correo"],
+            pasajero["telefono"]
+        ))
+
+    conexion.commit()
+    conexion.close()
