@@ -1,7 +1,13 @@
 import os
-from PySide6.QtWidgets import (QWidget,QLabel,QStackedWidget,QPushButton,QVBoxLayout,QSizePolicy,QFrame,QApplication,QHBoxLayout,QLineEdit,QTableWidget, QTableWidgetItem, QHeaderView)
+
+from PySide6.QtWidgets import (
+    QWidget, QLabel, QStackedWidget, QPushButton, QVBoxLayout,
+    QSizePolicy, QFrame, QApplication, QHBoxLayout,
+    QLineEdit, QTableWidget, QTableWidgetItem, QHeaderView
+)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPalette, QBrush, QPixmap, QFontDatabase, QFont, QColor
+
 
 # -----------------------------
 # Widget personalizado del Logo
@@ -28,6 +34,7 @@ class LogoWidget(QLabel):
 
         super().resizeEvent(event)
 
+
 # -----------------------------
 # Paneles
 # -----------------------------
@@ -44,25 +51,26 @@ class Panel(QFrame):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(widget_inside, alignment=Qt.AlignCenter)
 
+
 # -----------------------------
 # Pantalla Menú
 # -----------------------------
 class Menu(QWidget):
     def __init__(self):
         super().__init__()
-        
+
         ruta_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        
+
         logo_path = os.path.join(ruta_dir, "recursos", "imagenes", "logo.png")
         original_logo = QPixmap(logo_path)
-        
+
         self.background = QPixmap(logo_path.replace("logo.png", "fondo.png"))
 
         self.logo = LogoWidget(original_logo)
 
         self.btnbusqueda = QPushButton("Ir a Búsqueda")
         self.btnsalir = QPushButton("Abandonar")
-        
+
         # Se meten los botones en paneles
         panel_busqueda = Panel(self.btnbusqueda)
         panel_salir = Panel(self.btnsalir)
@@ -75,30 +83,31 @@ class Menu(QWidget):
         layout_principal = QVBoxLayout()
         layout_principal.setContentsMargins(40, 40, 40, 40)
         layout_principal.setSpacing(30)
+
         layout_principal.addStretch()
-        
         layout_principal.addWidget(self.logo)
         layout_principal.addStretch()
 
         layout_principal.addWidget(panel_busqueda, alignment=Qt.AlignCenter)
         layout_principal.addWidget(panel_salir, alignment=Qt.AlignCenter)
+
         layout_principal.addStretch()
 
         self.setLayout(layout_principal)
-    
+
     def resizeEvent(self, event):
-     if not self.background.isNull():
-        scaled_bg = self.background.scaled(
-            self.size(),
-            Qt.IgnoreAspectRatio,
-            Qt.SmoothTransformation
-        )
-        
-        palette = QPalette()
-        palette.setBrush(QPalette.Window, QBrush(scaled_bg))
-        self.setAutoFillBackground(True)
-        self.setPalette(palette)
-        
+        if not self.background.isNull():
+            scaled_bg = self.background.scaled(
+                self.size(),
+                Qt.IgnoreAspectRatio,
+                Qt.SmoothTransformation
+            )
+
+            palette = QPalette()
+            palette.setBrush(QPalette.Window, QBrush(scaled_bg))
+            self.setAutoFillBackground(True)
+            self.setPalette(palette)
+
         super(Menu, self).resizeEvent(event)
 
 
@@ -108,9 +117,10 @@ class Menu(QWidget):
 class Busqueda(QWidget):
     def __init__(self):
         super().__init__()
-        
+
         self.setStyleSheet("background-color: #E3F2FD;")
         self.setAutoFillBackground(True)
+
         palette = self.palette()
         palette.setColor(QPalette.Window, QColor("#084169"))
         self.setPalette(palette)
@@ -166,8 +176,9 @@ class Busqueda(QWidget):
         # =======================
         header = QFrame()
         header.setStyleSheet("background-color: white; border-radius: 8px;")
+
         header_layout = QHBoxLayout(header)
-        header_layout.setContentsMargins(15, 10, 15, 10)  
+        header_layout.setContentsMargins(15, 10, 15, 10)
 
         search_bar = QLineEdit()
         search_bar.setPlaceholderText("Buscar pasajero...")
@@ -189,25 +200,29 @@ class Busqueda(QWidget):
         header_layout.addWidget(search_bar)
         header_layout.addStretch()
         header_layout.addWidget(user_label)
-        
 
         # =======================
         # TABLA
         # =======================
         table_container = QFrame()
         table_container.setStyleSheet("background-color: white; border-radius: 8px;")
+
         table_layout = QVBoxLayout(table_container)
         table_layout.setContentsMargins(20, 20, 20, 20)
 
         table = QTableWidget()
-        table.setColumnCount(5)  # Ahora sí tenemos 5 columnas
-        table.setHorizontalHeaderLabels(["Nombre", "Apellido", "CI", "Correo Electrónico","Teléfono"])
+        table.setColumnCount(5)
+        table.setHorizontalHeaderLabels(
+            ["Nombre", "Apellido", "CI", "Correo Electrónico", "Teléfono"]
+        )
         table.setRowCount(6)
+
         table.horizontalHeader().setStretchLastSection(True)
         table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         table.setAlternatingRowColors(True)
         table.setShowGrid(False)
         table.setMinimumHeight(400)
+
         table.setFont(QFont(self.font().family(), 14))
         table.horizontalHeader().setFont(QFont(self.font().family(), 15))
 
@@ -228,7 +243,6 @@ class Busqueda(QWidget):
         table.verticalHeader().setVisible(False)
         table.setSelectionMode(QTableWidget.NoSelection)
 
-        # Datos de ejemplo, ahora con 5 campos y teléfono
         datos = [
             ("Juan", "Pérez", "12345678", "juan.perez@email.com", "555-1234"),
             ("María", "Gómez", "87654321", "maria.gomez@email.com", "555-5678"),
@@ -238,12 +252,11 @@ class Busqueda(QWidget):
             ("Sofía", "López", "96385274", "sofia.lopez@email.com", "555-2345"),
         ]
 
-        # Insertar datos centrados en la tabla
         for row, data in enumerate(datos):
             for col, value in enumerate(data):
                 item = QTableWidgetItem(str(value))
                 item.setFlags(Qt.ItemIsEnabled)
-                item.setTextAlignment(Qt.AlignCenter)  # <-- Centramos el texto
+                item.setTextAlignment(Qt.AlignCenter)
                 table.setItem(row, col, item)
 
         table_layout.addWidget(table)
@@ -288,17 +301,14 @@ class Busqueda(QWidget):
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-        
-        # COLOR DE FONDO PRINCIPAL
+
         self.setAutoFillBackground(True)
         palette = self.palette()
         palette.setColor(QPalette.Window, QColor("#054A81"))
         self.setPalette(palette)
 
         ruta_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        
-        
-        # --- Fuente personalizada ---
+
         font_path = os.path.join(ruta_dir, "recursos", "fuentes", "Banita.ttf")
         font_id = QFontDatabase.addApplicationFont(font_path)
 
@@ -308,50 +318,44 @@ class MainWindow(QWidget):
         else:
             print("Error cargando la fuente")
             self.custom_font = QFont("Arial", 40)
-        
+
         QApplication.instance().setFont(self.custom_font)
-        
+
         self.setStyleSheet("""
-        QFrame#panel {
-            background-color: #0A4D8C;
-            border-radius: 15px;
-        }
+            QFrame#panel {
+                background-color: #0A4D8C;
+                border-radius: 15px;
+            }
 
-        QPushButton {
-            background-color: #0A4D8C;
-            color: white;
-            border: black;
-            border-radius: 15px;
-            padding: 20px;
-            font-size: 23px;
-        }
+            QPushButton {
+                background-color: #0A4D8C;
+                color: white;
+                border: black;
+                border-radius: 15px;
+                padding: 20px;
+                font-size: 23px;
+            }
 
-        QPushButton:hover {
-            background-color: #1366B3;
-        }
+            QPushButton:hover {
+                background-color: #1366B3;
+            }
 
-        QPushButton:pressed {
-            background-color: #083A66;
-        }
+            QPushButton:pressed {
+                background-color: #083A66;
+            }
         """)
-        
-        background_path = os.path.join(ruta_dir, "recursos", "imagenes", "fondo.png")
 
-        # --- Stack de pantallas ---
         self.stack = QStackedWidget()
         layout = QVBoxLayout(self)
         layout.addWidget(self.stack)
 
-        # Crear pantallas
         self.pantalla_menu = Menu()
         self.pantalla_busqueda = Busqueda()
 
-        # Añadir al stack
         self.stack.addWidget(self.pantalla_menu)
         self.stack.addWidget(self.pantalla_busqueda)
         self.stack.setCurrentWidget(self.pantalla_menu)
 
-        # Conectar botones
         self.pantalla_menu.btnbusqueda.clicked.connect(self.ir_a_busqueda)
         self.pantalla_menu.btnsalir.clicked.connect(self.close)
         self.pantalla_busqueda.btn_back.clicked.connect(self.ir_a_menu)
