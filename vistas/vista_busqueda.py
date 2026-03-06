@@ -161,3 +161,15 @@ class VistaBusqueda(QWidget):
 
         main_layout.addWidget(sidebar)
         main_layout.addWidget(content)
+    
+    def cargar_pasajeros_en_tabla(self, pasajeros):
+
+        self.table.setRowCount(len(pasajeros))
+
+        for row, pasajero in enumerate(pasajeros):
+
+            self.table.setItem(row, 0, QTableWidgetItem(pasajero["nombre"]))
+            self.table.setItem(row, 1, QTableWidgetItem(pasajero["apellido"]))
+            self.table.setItem(row, 2, QTableWidgetItem(pasajero["ci"]))
+            self.table.setItem(row, 3, QTableWidgetItem(pasajero["correo"]))
+            self.table.setItem(row, 4, QTableWidgetItem(pasajero["telefono"]))

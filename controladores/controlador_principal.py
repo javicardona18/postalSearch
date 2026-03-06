@@ -3,11 +3,10 @@ from PySide6.QtWidgets import QWidget, QStackedWidget, QVBoxLayout, QApplication
 from PySide6.QtGui import QPalette, QColor, QFontDatabase, QFont
 from vistas.vista_menu import VistaMenu
 from vistas.vista_busqueda import VistaBusqueda
-from modelos.modelo_pasajero import obtener_pasajeros
 from PySide6.QtWidgets import QTableWidgetItem
 from PySide6.QtCore import Qt
 from servicios.kiu_api import obtener_pasajeros_api
-from modelos.modelo_pasajero import insertar_pasajeros_api
+from modelos.modelo_pasajero import ModeloPasajero
 
 
 class ControladorPrincipal(QWidget):
@@ -18,6 +17,7 @@ class ControladorPrincipal(QWidget):
         palette = self.palette()
         palette.setColor(QPalette.Window, QColor("#054A81"))
         self.setPalette(palette)
+        self.modelo = ModeloPasajero()
 
         ruta_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -74,22 +74,33 @@ class ControladorPrincipal(QWidget):
         self.setWindowTitle("PostalSearch")
         self.showMaximized()
 
-        self.cargar_tabla()
+        self.actualizar_desde_api()
 
     def ir_a_busqueda(self):
         self.stack.setCurrentWidget(self.pantalla_busqueda)
+        self.cargar_tabla()
 
     def ir_a_menu(self):
         self.stack.setCurrentWidget(self.pantalla_menu)
 
     def cargar_tabla(self):
-        datos = obtener_pasajeros()
+
+        datos = self.modelo.obtener_pasajeros()
 
         tabla = self.pantalla_busqueda.table
         tabla.setRowCount(len(datos))
 
         for row, fila in enumerate(datos):
-            for col, valor in enumerate(fila):
+
+            valores = [
+                fila["nombre"],
+                fila["apellido"],
+                fila["ci"],
+                fila["correo"],
+                fila["telefono"]
+            ]
+
+            for col, valor in enumerate(valores):
                 item = QTableWidgetItem(str(valor))
                 item.setFlags(Qt.ItemIsEnabled)
                 item.setTextAlignment(Qt.AlignCenter)
@@ -99,7 +110,8 @@ class ControladorPrincipal(QWidget):
 
         pasajeros = obtener_pasajeros_api()
 
-        insertar_pasajeros_api(pasajeros)
+        self.modelo.insertar_pasajeros_api(pasajeros)
 
-        self.cargar_tabla()
-            
+        datos = self.modelo.obtener_pasajeros()
+
+        self.pantalla_busqueda.cargar_pasajeros_en_tabla(datos)

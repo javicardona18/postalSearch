@@ -1,13 +1,19 @@
-import requests
+import os
+import json
 
 
 def obtener_pasajeros_api():
 
-    url = "https://api.kiusystem.com/pasajeros"
+    # Carpeta donde está este archivo (servicios)
+    ruta_actual = os.path.dirname(os.path.abspath(__file__))
 
-    response = requests.get(url)
+    # Subimos a la raíz del proyecto
+    ruta_proyecto = os.path.dirname(ruta_actual)
 
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return []
+    # Ruta al JSON dentro de /data
+    ruta_json = os.path.join(ruta_proyecto, "data", "pasajeros.json")
+
+    with open(ruta_json, "r", encoding="utf-8") as archivo:
+        pasajeros = json.load(archivo)
+
+    return pasajeros

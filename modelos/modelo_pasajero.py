@@ -1,6 +1,6 @@
 import sqlite3
 import os
-
+import json
 
 # Ruta absoluta a la base de datos
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -48,10 +48,20 @@ def obtener_pasajeros():
     cursor = conexion.cursor()
 
     cursor.execute("SELECT nombre, apellido, ci, correo, telefono FROM pasajeros")
-    datos = cursor.fetchall()
+    filas = cursor.fetchall()
 
-    conexion.close()
-    return datos
+    pasajeros = []
+
+    for fila in filas:
+        pasajeros.append({
+            "nombre": fila[0],
+            "apellido": fila[1],
+            "ci": fila[2],
+            "correo": fila[3],
+            "telefono": fila[4]
+        })
+
+    return pasajeros
 
 
 def eliminar_pasajero(ci):
@@ -87,23 +97,35 @@ def insertar_datos_prueba():
 
     conexion.close()
 
-def insertar_pasajeros_api(lista_pasajeros):
+class ModeloPasajero:
 
-    conexion = conectar()
-    cursor = conexion.cursor()
+    def __init__(self, ruta_json="data/pasajeros.json"):
+        self.ruta_json = ruta_json
 
-    for pasajero in lista_pasajeros:
+    def obtener_pasajeros(self):
+        with open(self.ruta_json, "r", encoding="utf-8") as archivo:
+            datos = json.load(archivo)
 
-        cursor.execute("""
+        return datos
+    
+    def insertar_pasajeros_api(self, pasajeros):
+
+        conexion = sqlite3.connect("base_datos/postalSearch.db")
+        cursor = conexion.cursor()
+        
+        cursor.execute("DELETE FROM pasajeros")
+
+        for p in pasajeros:
+            cursor.execute("""
             INSERT INTO pasajeros (nombre, apellido, ci, correo, telefono)
             VALUES (?, ?, ?, ?, ?)
-        """, (
-            pasajero["nombre"],
-            pasajero["apellido"],
-            pasajero["ci"],
-            pasajero["correo"],
-            pasajero["telefono"]
-        ))
+            """, (
+                p["nombre"],
+                p["apellido"],
+                p["ci"],
+                p["correo"],
+                p["telefono"]
+            ))
 
-    conexion.commit()
-    conexion.close()
+        conexion.commit()
+        conexion.close()
