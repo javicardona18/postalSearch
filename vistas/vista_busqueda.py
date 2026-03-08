@@ -1,15 +1,17 @@
 from PySide6.QtWidgets import (
     QWidget, QFrame, QHBoxLayout, QVBoxLayout,
     QPushButton, QLabel, QLineEdit,
-    QTableWidget, QTableWidgetItem, QHeaderView
+    QTableWidget, QTableWidgetItem, QHeaderView, QMenu
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPalette, QColor, QFont
+from PySide6.QtGui import QPalette, QColor, QFont, QAction
 
 
 class VistaBusqueda(QWidget):
     def __init__(self):
         super().__init__()
+        
+        print("VistaBusqueda cargada")
 
         self.setStyleSheet("background-color: #E3F2FD;")
         self.setAutoFillBackground(True)
@@ -72,11 +74,11 @@ class VistaBusqueda(QWidget):
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(15, 10, 15, 10)
 
-        search_bar = QLineEdit()
-        search_bar.setPlaceholderText("Buscar pasajero...")
-        search_bar.setFixedHeight(35)
-        search_bar.setFont(QFont(self.font().family(), 14))
-        search_bar.setStyleSheet("""
+        self.search_bar = QLineEdit()
+        self.search_bar.setPlaceholderText("Buscar pasajero...")
+        self.search_bar.setFixedHeight(35)
+        self.search_bar.setFont(QFont(self.font().family(), 14))
+        self.search_bar.setStyleSheet("""
             QLineEdit {
                 border: 2px solid #90CAF9;
                 border-radius: 6px;
@@ -84,13 +86,47 @@ class VistaBusqueda(QWidget):
                 background-color: #F5F5F5;
             }
         """)
+        
+        self.btn_buscar = QPushButton("Buscar")
+        self.btn_buscar.setFixedHeight(35)
+        
+        self.btn_filtros = QPushButton("Filtros ▼")
+        self.btn_filtros.setFixedHeight(35)
+        
+        self.menu_filtros = QMenu()
+        self.filtro_nombre = QAction("Nombre", self)
+        self.filtro_apellido = QAction("Apellido", self)
+        self.filtro_ci = QAction("CI", self)
+        self.filtro_correo = QAction("Correo", self)
+        self.filtro_telefono = QAction("Teléfono", self)
+
+        self.menu_filtros.addAction(self.filtro_nombre)
+        self.menu_filtros.addAction(self.filtro_apellido)
+        self.menu_filtros.addAction(self.filtro_ci)
+        self.menu_filtros.addAction(self.filtro_correo)
+        self.menu_filtros.addAction(self.filtro_telefono)
+        
+        self.btn_filtros.setMenu(self.menu_filtros)
+        self.filtro_activo = "nombre"
+        
+        self.filtro_nombre.triggered.connect(lambda: self.cambiar_filtro("nombre"))
+        self.filtro_apellido.triggered.connect(lambda: self.cambiar_filtro("apellido"))
+        self.filtro_ci.triggered.connect(lambda: self.cambiar_filtro("ci"))
+        self.filtro_correo.triggered.connect(lambda: self.cambiar_filtro("correo"))
+        self.filtro_telefono.triggered.connect(lambda: self.cambiar_filtro("telefono"))
 
         user_label = QLabel("Usuario")
         user_label.setStyleSheet("color: #424242;")
         user_label.setFont(QFont(self.font().family(), 14))
 
-        header_layout.addWidget(search_bar)
+        header_layout.addWidget(self.search_bar)
+        header_layout.addWidget(self.btn_buscar)
+        header_layout.addWidget(self.btn_filtros)
+        
+        self.search_bar.returnPressed.connect(self.btn_buscar.click)
+
         header_layout.addStretch()
+
         header_layout.addWidget(user_label)
 
         # TABLA
@@ -173,3 +209,9 @@ class VistaBusqueda(QWidget):
             self.table.setItem(row, 2, QTableWidgetItem(pasajero["ci"]))
             self.table.setItem(row, 3, QTableWidgetItem(pasajero["correo"]))
             self.table.setItem(row, 4, QTableWidgetItem(pasajero["telefono"]))
+
+    def cambiar_filtro(self, filtro):
+
+        self.filtro_activo = filtro
+
+        self.btn_filtros.setText(f"Filtro: {filtro.capitalize()} ▼")
