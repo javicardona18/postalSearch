@@ -1,15 +1,17 @@
 from PySide6.QtWidgets import (
     QWidget, QFrame, QHBoxLayout, QVBoxLayout,
     QPushButton, QLabel, QLineEdit,
-    QTableWidget, QTableWidgetItem, QHeaderView
+    QTableWidget, QTableWidgetItem, QHeaderView, QMenu
 )
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPalette, QColor, QFont
+from PySide6.QtGui import QPalette, QColor, QFont, QAction
 
 
 class VistaBusqueda(QWidget):
     def __init__(self):
         super().__init__()
+        
+        print("VistaBusqueda cargada")
 
         self.setStyleSheet("background-color: #E3F2FD;")
         self.setAutoFillBackground(True)
@@ -88,11 +90,61 @@ class VistaBusqueda(QWidget):
                 background-color: #F5F5F5;
             }
         """)
-
-        # BOTÓN BUSCAR
+        
+        #Declaracion de boton buscar
         self.btn_buscar = QPushButton("Buscar")
         self.btn_buscar.setFixedSize(110, 35)
+        
+        #Declaracion de boton Filtros
+        self.btn_filtros = QPushButton("Filtros")
+        self.btn_filtros.setFixedSize(120, 35)
+        
+        #Panel que se abre al clickear filtros
+        self.menu_filtros = QMenu()
+        
+        #Estilo del menu de Filtros
+        self.menu_filtros.setStyleSheet("""
+            QMenu {
+                background-color: white;
+                border: 1px solid #B0BEC5;
+                padding: 5px;
+                font-size: 15px;
+            }
 
+            QMenu::item {
+                padding: 6px 20px;
+            }
+
+            QMenu::item:selected {
+                background-color: #42A5F5;
+                color: white;
+            }
+            """)
+        self.menu_filtros.setFixedWidth(self.btn_filtros.width())
+        
+        #Opciones de filtro
+        self.filtro_nombre = QAction("Nombre", self)
+        self.filtro_apellido = QAction("Apellido", self)
+        self.filtro_ci = QAction("CI", self)
+        self.filtro_correo = QAction("Correo", self)
+        self.filtro_telefono = QAction("Teléfono", self)
+
+        self.menu_filtros.addAction(self.filtro_nombre)
+        self.menu_filtros.addAction(self.filtro_apellido)
+        self.menu_filtros.addAction(self.filtro_ci)
+        self.menu_filtros.addAction(self.filtro_correo)
+        self.menu_filtros.addAction(self.filtro_telefono)
+        
+        self.btn_filtros.setMenu(self.menu_filtros)
+        self.filtro_activo = "nombre"
+        
+        self.filtro_nombre.triggered.connect(lambda: self.cambiar_filtro("nombre"))
+        self.filtro_apellido.triggered.connect(lambda: self.cambiar_filtro("apellido"))
+        self.filtro_ci.triggered.connect(lambda: self.cambiar_filtro("ci"))
+        self.filtro_correo.triggered.connect(lambda: self.cambiar_filtro("correo"))
+        self.filtro_telefono.triggered.connect(lambda: self.cambiar_filtro("telefono"))
+
+        # BOTÓN BUSCAR DISEÑO
         self.btn_buscar.setStyleSheet("""
         QPushButton {
             background-color: #42A5F5;
@@ -107,10 +159,7 @@ class VistaBusqueda(QWidget):
         }
         """)
 
-        # BOTÓN FILTROS
-        self.btn_filtros = QPushButton("Filtros")
-        self.btn_filtros.setFixedSize(120, 35)
-
+        # BOTÓN FILTROS DISEÑO
         self.btn_filtros.setStyleSheet("""
         QPushButton {
             background-color: #42A5F5;
@@ -147,6 +196,7 @@ class VistaBusqueda(QWidget):
 
         header_layout.addLayout(search_container)
         header_layout.addStretch()
+
         header_layout.addWidget(user_label)
         
         # TABLA
@@ -229,3 +279,18 @@ class VistaBusqueda(QWidget):
             self.table.setItem(row, 2, QTableWidgetItem(pasajero["ci"]))
             self.table.setItem(row, 3, QTableWidgetItem(pasajero["correo"]))
             self.table.setItem(row, 4, QTableWidgetItem(pasajero["telefono"]))
+
+# Que cambie el nombre del boton filtros segun lo seleccionado
+    def cambiar_filtro(self, filtro):
+
+        self.filtro_activo = filtro
+        
+        nombres = {
+        "nombre": "Por Nombre",
+        "apellido": "Por Apellido",
+        "ci": "Por CI",
+        "correo": "Por Correo",
+        "telefono": "Por Teléfono"
+        }
+
+        self.btn_filtros.setText(nombres[filtro])
