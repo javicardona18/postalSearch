@@ -92,7 +92,7 @@ class VistaBusqueda(QWidget):
         
         self.btn_filtros = QPushButton("Filtros ▼")
         self.btn_filtros.setFixedHeight(35)
-        
+
         self.menu_filtros = QMenu()
         self.filtro_nombre = QAction("Nombre", self)
         self.filtro_apellido = QAction("Apellido", self)
