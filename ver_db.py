@@ -4,7 +4,7 @@ conexion = sqlite3.connect("base_datos/postalSearch.db")
 cursor = conexion.cursor()
 
 cursor.execute("SELECT * FROM pasajeros")
-datos = cursor.fetchall()
+datos = cursor.fetchall()   
 
 for fila in datos:
     print(fila)

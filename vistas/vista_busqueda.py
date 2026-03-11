@@ -72,11 +72,15 @@ class VistaBusqueda(QWidget):
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(15, 10, 15, 10)
 
-        search_bar = QLineEdit()
-        search_bar.setPlaceholderText("Buscar pasajero...")
-        search_bar.setFixedHeight(35)
-        search_bar.setFont(QFont(self.font().family(), 14))
-        search_bar.setStyleSheet("""
+        # =========================
+        # CREAR WIDGETS
+        # =========================
+
+        self.search_bar = QLineEdit()
+        self.search_bar.setPlaceholderText("Buscar pasajero...")
+        self.search_bar.setFixedHeight(35)
+        self.search_bar.setFont(QFont(self.font().family(), 14))
+        self.search_bar.setStyleSheet("""
             QLineEdit {
                 border: 2px solid #90CAF9;
                 border-radius: 6px;
@@ -85,14 +89,66 @@ class VistaBusqueda(QWidget):
             }
         """)
 
+        # BOTÓN BUSCAR
+        self.btn_buscar = QPushButton("Buscar")
+        self.btn_buscar.setFixedSize(110, 35)
+
+        self.btn_buscar.setStyleSheet("""
+        QPushButton {
+            background-color: #42A5F5;
+            color: white;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 5px;
+        }
+        QPushButton:hover {
+            background-color: #1E88E5;
+        }
+        """)
+
+        # BOTÓN FILTROS
+        self.btn_filtros = QPushButton("Filtros")
+        self.btn_filtros.setFixedSize(120, 35)
+
+        self.btn_filtros.setStyleSheet("""
+        QPushButton {
+            background-color: #42A5F5;
+            color: white;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 5px;
+        }
+        QPushButton:hover {
+            background-color: #64B5F6;
+        }
+        """)
         user_label = QLabel("Usuario")
         user_label.setStyleSheet("color: #424242;")
         user_label.setFont(QFont(self.font().family(), 14))
 
-        header_layout.addWidget(search_bar)
+        # =========================
+        # CREAR LAYOUTS
+        # =========================
+
+        search_container = QVBoxLayout()
+
+        fila_busqueda = QHBoxLayout()
+        fila_busqueda.addWidget(self.search_bar)
+        fila_busqueda.addWidget(self.btn_buscar)
+
+        search_container.addLayout(fila_busqueda)
+        search_container.addWidget(self.btn_filtros)
+
+        # =========================
+        # AGREGAR AL HEADER
+        # =========================
+
+        header_layout.addLayout(search_container)
         header_layout.addStretch()
         header_layout.addWidget(user_label)
-
+        
         # TABLA
         table_container = QFrame()
         table_container.setStyleSheet("background-color: white; border-radius: 8px;")
