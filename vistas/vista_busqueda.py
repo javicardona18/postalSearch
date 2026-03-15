@@ -94,7 +94,9 @@ class VistaBusqueda(QWidget):
         #Declaracion de boton buscar
         self.btn_buscar = QPushButton("Buscar")
         self.btn_buscar.setFixedSize(110, 35)
-        
+        self.btn_buscar.clicked.connect(self.buscar)
+        self.search_bar.returnPressed.connect(self.buscar)
+
         #Declaracion de boton Filtros
         self.btn_filtros = QPushButton("Filtros")
         self.btn_filtros.setFixedSize(120, 35)
@@ -137,12 +139,14 @@ class VistaBusqueda(QWidget):
         
         self.btn_filtros.setMenu(self.menu_filtros)
         self.filtro_activo = "nombre"
-        
+
         self.filtro_nombre.triggered.connect(lambda: self.cambiar_filtro("nombre"))
         self.filtro_apellido.triggered.connect(lambda: self.cambiar_filtro("apellido"))
         self.filtro_ci.triggered.connect(lambda: self.cambiar_filtro("ci"))
         self.filtro_correo.triggered.connect(lambda: self.cambiar_filtro("correo"))
         self.filtro_telefono.triggered.connect(lambda: self.cambiar_filtro("telefono"))
+
+        
 
         # BOTÓN BUSCAR DISEÑO
         self.btn_buscar.setStyleSheet("""
@@ -294,3 +298,15 @@ class VistaBusqueda(QWidget):
         }
 
         self.btn_filtros.setText(nombres[filtro])
+
+    def buscar(self):
+
+        texto = self.search_bar.text().strip()
+        filtro = self.filtro_activo
+
+        if texto == "":
+            return
+
+        resultados = self.controlador.buscar_pasajeros(texto, filtro)
+
+        self.actualizar_tabla(resultados)

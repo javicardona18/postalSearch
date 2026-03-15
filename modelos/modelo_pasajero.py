@@ -129,3 +129,39 @@ class ModeloPasajero:
 
         conexion.commit()
         conexion.close()
+    
+    def buscar(self, texto, filtro):
+        columnas = {
+            "nombre": "nombre",
+            "apellido": "apellido",
+            "ci": "ci",
+            "correo": "correo",
+            "telefono": "telefono"
+        }
+        columna = columnas[filtro]
+
+        query = f"""
+        SELECT nombre, apellido, ci, correo, telefono
+        FROM pasajeros
+        WHERE {columna} LIKE ?
+        """
+
+        conexion = sqlite3.connect("base_datos/postalSearch.db")
+        cursor = conexion.cursor()
+        cursor.execute(query, (f"%{texto}%",))
+        resultados = cursor.fetchall()
+        conexion.close()
+
+        # Convertir a diccionarios para que la vista funcione
+        pasajeros = []
+        for fila in resultados:
+            pasajeros.append({
+                "nombre": fila[0],
+                "apellido": fila[1],
+                "ci": fila[2],
+                "correo": fila[3],
+                "telefono": fila[4]
+            })
+
+        return pasajeros
+   
